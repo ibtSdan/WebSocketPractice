@@ -17,7 +17,7 @@ public class PostController {
     @PostMapping("/write")
     public void writePost(@RequestBody String content){
         // 웹소켓을 통해 실시간 처리
-
+        // WebSocket을 통해 "/topic/vote" 채널로 모든 클라이언트에게 결과 전송
         messagingTemplate.convertAndSend("/topic/posts", content);
     }
 }

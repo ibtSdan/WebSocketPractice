@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Post Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h1>Write a Post</h1>
+<textarea id="postContent"></textarea>
+<button onclick="writePost()">Submit Post</button>
+
+<h2>Posts</h2>
+<div id="posts"></div>
+
+<script>
+    // WebSocket 연결 설정
+    var socket = new SockJS('/chat');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe('/topic/posts', function (message) {
+            // 새 글이 도착하면 이를 화면에 표시
+            var postsDiv = document.getElementById('posts');
+            var newPost = document.createElement('p');
+            newPost.textContent = message.body;
+            postsDiv.appendChild(newPost);
+        });
+    });
+
+    function writePost() {
+        var content = document.getElementById('postContent').value;
+        fetch('/write', {
+            method: 'POST',
+            body: content,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => response.text())
+            .then(data => {
+                console.log('Post submitted:', data);
+            });
+    }
+</script>
+</body>
+</html>
