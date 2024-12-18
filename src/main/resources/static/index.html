@@ -20,28 +20,34 @@
     var socket = new SockJS('/chat');
     var stompClient = Stomp.over(socket);
 
+    // WebSocket 연결 시, 서버에서 /topic/posts 채널을 구독
     stompClient.connect({}, function (frame) {
         stompClient.subscribe('/topic/posts', function (message) {
             // 새 글이 도착하면 이를 화면에 표시
             var postsDiv = document.getElementById('posts');
             var newPost = document.createElement('p');
-            newPost.textContent = message.body;
-            postsDiv.appendChild(newPost);
+            newPost.textContent = message.body;  // 받은 메시지 내용(새 글)
+            postsDiv.appendChild(newPost);  // 화면에 추가
         });
     });
 
+    // 글 작성 버튼 클릭 시 서버로 글 전송
     function writePost() {
         var content = document.getElementById('postContent').value;
+
+        // 글 작성 요청을 서버에 POST로 전송
         fetch('/write', {
             method: 'POST',
-            body: content,
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ content: content })  // 요청 본문에 글 내용 담기
         }).then(response => response.text())
             .then(data => {
-                console.log('Post submitted:', data);
-            });
+                console.log('Post submitted:', data);  // 서버 응답을 콘솔에 출력
+            }).catch(error => {
+            console.error('Error:', error);  // 에러 발생 시 출력
+        });
     }
 </script>
 </body>
